@@ -11,7 +11,8 @@ const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const BASE_URL = "https://barbacoa-alex-bot.onrender.com";
 
-const chatsConAsesor = new Set();
+const chatsConAsesor = new Map();
+const TIEMPO_ASESOR = 15 * 60 * 1000; // 15 minutos
 
 async function enviarMensaje(to, text) {
   await axios.post(
@@ -125,7 +126,14 @@ app.post("/webhook", async (req, res) => {
     const from = message.from;
 
     if (chatsConAsesor.has(from)) {
-      return res.sendStatus(200);
+      const horaInicio = chatsConAsesor.get(from);
+      const tiempoTranscurrido = Date.now() - horaInicio;
+
+      if (tiempoTranscurrido < TIEMPO_ASESOR) {
+        return res.sendStatus(200);
+      }
+
+      chatsConAsesor.delete(from);
     }
 
     const text = message.text?.body?.toLowerCase().trim() || "";
@@ -176,10 +184,10 @@ https://www.google.com.mx/maps/place/Barbacoa+Alex/@19.6732768,-99.222316,17z/da
       await enviarMensaje(from,
 `👥 ¡Gracias por contactarnos!
 
-En un momento estaremos contigo para brindarte una cotización personalizada.`
+En un momento te atenderemos para brindarte una cotización personalizada.`
       );
 
-      chatsConAsesor.add(from);
+      chatsConAsesor.set(from, Date.now());
     }
 
     else if (
@@ -192,20 +200,22 @@ En un momento estaremos contigo para brindarte una cotización personalizada.`
       await enviarMensaje(from,
 `📝 ¡Gracias por comunicarte con *Barbacoa Alex*!
 
-En un momento estaremos contigo para tomar tu pedido.`
+En un momento te atenderemos.
+
+Por favor, escribe tu pedido y con gusto te ayudaremos.`
       );
 
-      chatsConAsesor.add(from);
+      chatsConAsesor.set(from, Date.now());
     }
 
     else {
       await enviarMensaje(from,
 `😊 Gracias por tu mensaje.
 
-En un momento estaremos contigo para atenderte.`
+En un momento te atenderemos.`
       );
 
-      chatsConAsesor.add(from);
+      chatsConAsesor.set(from, Date.now());
     }
 
     res.sendStatus(200);
