@@ -4,10 +4,12 @@ const axios = require("axios");
 
 const app = express();
 app.use(express.json());
+app.use(express.static(__dirname));
 
 const TOKEN = process.env.ACCESS_TOKEN;
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+const BASE_URL = "https://barbacoa-alex-bot.onrender.com";
 
 const chatsConAsesor = new Set();
 
@@ -29,6 +31,27 @@ async function enviarMensaje(to, text) {
   );
 }
 
+async function enviarImagenMenu(to) {
+  await axios.post(
+    `https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`,
+    {
+      messaging_product: "whatsapp",
+      to,
+      type: "image",
+      image: {
+        link: `${BASE_URL}/menu.png`,
+        caption: "🍖 *Menú Barbacoa Alex*\n\nSi tienes alguna duda, con gusto te ayudamos."
+      }
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${TOKEN}`,
+        "Content-Type": "application/json"
+      }
+    }
+  );
+}
+
 async function enviarLista(to) {
   await axios.post(
     `https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`,
@@ -38,23 +61,16 @@ async function enviarLista(to) {
       type: "interactive",
       interactive: {
         type: "list",
-        header: {
-          type: "text",
-          text: "Barbacoa Alex 🍖"
-        },
-        body: {
-          text: "👋 ¡Hola! Bienvenido a Barbacoa Alex.\n\nSelecciona una opción:"
-        },
-        footer: {
-          text: "Gracias por preferirnos ❤️"
-        },
+        header: { type: "text", text: "*BARBACOA ALEX*" },
+        body: { text: "👋 ¡Hola! Bienvenidos gracias por comunicarte con nosotros. ¿En qué podemos ayudarte hoy?.\n\nSelecciona una opción para continuar:" },
+        footer: { text: "!Sera un gusto atenderte!" },
         action: {
           button: "Ver opciones",
           sections: [
             {
               title: "Opciones",
               rows: [
-                { id: "menu", title: "🍖 Menú" },
+                { id: "menu", title: "🌮 Menú" },
                 { id: "horarios", title: "🕒 Horarios" },
                 { id: "ubicacion", title: "📍 Ubicación" },
                 { id: "cotizacion", title: "👥 Cotización" },
@@ -88,9 +104,7 @@ app.get("/webhook", (req, res) => {
 
 app.post("/webhook", async (req, res) => {
   try {
-    const entry = req.body.entry?.[0];
-    const changes = entry?.changes?.[0];
-    const message = changes?.value?.messages?.[0];
+    const message = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
 
     if (!message) return res.sendStatus(200);
 
@@ -108,12 +122,12 @@ app.post("/webhook", async (req, res) => {
     }
 
     else if (option === "menu" || text === "1") {
-      await enviarMensaje(from, "🍖 Te compartimos nuestro menú. En un momento enviaremos la imagen del menú.");
+      await enviarImagenMenu(from);
     }
 
     else if (option === "horarios" || text === "2") {
       await enviarMensaje(from,
-`🕒 Horario de atención
+`🕒 *Horario de atención*
 
 📅 Domingos
 🕗 8:00 a.m. a 3:00 p.m.
@@ -124,19 +138,19 @@ app.post("/webhook", async (req, res) => {
 
     else if (option === "ubicacion" || text === "3") {
       await enviarMensaje(from,
-`📍 Nuestra ubicación:
+`📍 *Nuestra ubicación:*
 
-https://www.google.com.mx/maps/place/Barbacoa+Alex/@19.6732768,-99.222316,17z`
+https://www.google.com.mx/maps/place/Barbacoa+Alex/@19.6732768,-99.222316,17z/data=!3m1!4b1!4m6!3m5!1s0x85d21f0a333a61f7:0xcc1e2a79dab1c2ca!8m2!3d19.6732768!4d-99.2197411!16s%2Fg%2F11tnm4dw3x`
       );
     }
 
     else if (option === "cotizacion" || text === "4") {
-      await enviarMensaje(from, "👥 ¡Gracias por contactarnos! En un momento estaremos contigo para brindarte una cotización personalizada. 🍖");
+      await enviarMensaje(from, "👥 ¡Gracias por contactarnos! En un momento estaremos contigo para brindarte una cotización personalizada. ");
       chatsConAsesor.add(from);
     }
 
     else if (option === "pedido" || text === "5") {
-      await enviarMensaje(from, "📝 ¡Gracias por comunicarte con Barbacoa Alex! En un momento estaremos contigo para tomar tu pedido. 🍖");
+      await enviarMensaje(from, "📝 ¡Gracias por comunicarte con *Barbacoa Alex*! En un momento estaremos contigo para tomar tu pedido. ");
       chatsConAsesor.add(from);
     }
 
@@ -152,5 +166,5 @@ https://www.google.com.mx/maps/place/Barbacoa+Alex/@19.6732768,-99.222316,17z`
 });
 
 app.listen(process.env.PORT, () => {
-  console.log(`🍖 Bot Barbacoa Alex corriendo en puerto ${process.env.PORT}`);
+  console.log(` Bot Barbacoa Alex corriendo en puerto ${process.env.PORT}`);
 });
