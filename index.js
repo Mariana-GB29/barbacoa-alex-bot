@@ -40,7 +40,14 @@ async function enviarImagenMenu(to) {
       type: "image",
       image: {
         link: `${BASE_URL}/menu.png`,
-        caption: " *Menú Barbacoa Alex*\n\nSi tienes alguna duda, con gusto te ayudamos."
+        caption:
+`*Menú Barbacoa Alex*
+
+Para hacer un pedido, responde con la opción:
+
+📝 *5. Hacer pedido*
+
+O escribe: *pedido*`
       }
     },
     {
@@ -62,8 +69,15 @@ async function enviarLista(to) {
       interactive: {
         type: "list",
         header: { type: "text", text: "BARBACOA ALEX" },
-        body: { text: "👋 ¡Hola! Bienvenidos gracias por comunicarte con nosotros. ¿En qué podemos ayudarte hoy?.\n\nSelecciona una opción para continuar:" },
-        footer: { text: "!Sera un gusto atenderte!" },
+        body: {
+          text:
+`👋 ¡Hola! Bienvenidos a *Barbacoa Alex*.
+
+Gracias por comunicarte con nosotros. ¿En qué podemos ayudarte hoy?
+
+Selecciona una opción para continuar:`
+        },
+        footer: { text: "¡Será un gusto atenderte!" },
         action: {
           button: "Ver opciones",
           sections: [
@@ -114,10 +128,18 @@ app.post("/webhook", async (req, res) => {
       return res.sendStatus(200);
     }
 
-    const text = message.text?.body?.toLowerCase().trim();
-    const option = message.interactive?.list_reply?.id;
+    const text = message.text?.body?.toLowerCase().trim() || "";
+    const option =
+      message.interactive?.list_reply?.id ||
+      message.interactive?.button_reply?.id ||
+      "";
 
-    if (text === "hola" || text === "buenas" || text === "menu" || text === "menú") {
+    if (
+      text === "hola" ||
+      text === "buenas" ||
+      text === "menu" ||
+      text === "menú"
+    ) {
       await enviarLista(from);
     }
 
@@ -127,35 +149,62 @@ app.post("/webhook", async (req, res) => {
 
     else if (option === "horarios" || text === "2") {
       await enviarMensaje(from,
-`🕒 *Horario de atención*
 
-📅 Domingos
+Te esperamos los domingos de:
 🕗 8:00 a.m. a 3:00 p.m.
 
-📌 Envíanos mensaje para confirmar si aún tenemos barbacoa disponible.`
+Te recomendamos escribirnos para consultar disponibilidad antes de tu visita.`
       );
     }
 
     else if (option === "ubicacion" || text === "3") {
       await enviarMensaje(from,
-`📍 *Nuestra ubicación:*
+`📍 *Encuentranos*
 
 https://www.google.com.mx/maps/place/Barbacoa+Alex/@19.6732768,-99.222316,17z/data=!3m1!4b1!4m6!3m5!1s0x85d21f0a333a61f7:0xcc1e2a79dab1c2ca!8m2!3d19.6732768!4d-99.2197411!16s%2Fg%2F11tnm4dw3x`
       );
     }
 
-    else if (option === "cotizacion" || text === "4") {
-      await enviarMensaje(from, "👥 ¡Gracias por contactarnos! En un momento estaremos contigo para brindarte una cotización personalizada. ");
+    else if (
+      option === "cotizacion" ||
+      text === "4" ||
+      text.includes("cotizacion") ||
+      text.includes("cotización") ||
+      text.includes("cotizar")
+    ) {
+      await enviarMensaje(from,
+`👥 ¡Gracias por contactarnos!
+
+En un momento estaremos contigo para brindarte una cotización personalizada.`
+      );
+
       chatsConAsesor.add(from);
     }
 
-    else if (option === "pedido" || text === "5") {
-      await enviarMensaje(from, "📝 ¡Gracias por comunicarte con *Barbacoa Alex*! En un momento estaremos contigo para tomar tu pedido. ");
+    else if (
+      option === "pedido" ||
+      text === "5" ||
+      text.includes("pedido") ||
+      text.includes("pedir") ||
+      text.includes("ordenar")
+    ) {
+      await enviarMensaje(from,
+`📝 ¡Gracias por comunicarte con *Barbacoa Alex*!
+
+En un momento estaremos contigo para tomar tu pedido.`
+      );
+
       chatsConAsesor.add(from);
     }
 
     else {
-      await enviarLista(from);
+      await enviarMensaje(from,
+`😊 Gracias por tu mensaje.
+
+En un momento estaremos contigo para atenderte.`
+      );
+
+      chatsConAsesor.add(from);
     }
 
     res.sendStatus(200);
@@ -166,5 +215,5 @@ https://www.google.com.mx/maps/place/Barbacoa+Alex/@19.6732768,-99.222316,17z/da
 });
 
 app.listen(process.env.PORT, () => {
-  console.log(` Bot Barbacoa Alex corriendo en puerto ${process.env.PORT}`);
+  console.log(`Bot Barbacoa Alex corriendo en puerto ${process.env.PORT}`);
 });
