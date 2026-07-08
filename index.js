@@ -12,7 +12,7 @@ const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const BASE_URL = "https://barbacoa-alex-bot.onrender.com";
 
 const chatsConAsesor = new Map();
-const TIEMPO_ASESOR = 15 * 60 * 1000; // 15 minutos
+const TIEMPO_ASESOR = 4 * 60 * 1000; // 4 minutos
 
 async function enviarMensaje(to, text) {
   await axios.post(
