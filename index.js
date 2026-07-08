@@ -157,7 +157,7 @@ app.post("/webhook", async (req, res) => {
 
     else if (option === "horarios" || text === "2") {
       await enviarMensaje(from,
-`🕒 *Horario de atención*
+` *Horario de atención*
 
 Te esperamos los domingos de:
 🕗 8:00 a.m. a 3:00 p.m.
