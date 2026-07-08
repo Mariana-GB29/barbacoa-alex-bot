@@ -40,7 +40,7 @@ async function enviarImagenMenu(to) {
       type: "image",
       image: {
         link: `${BASE_URL}/menu.png`,
-        caption: "🍖 *Menú Barbacoa Alex*\n\nSi tienes alguna duda, con gusto te ayudamos."
+        caption: " *Menú Barbacoa Alex*\n\nSi tienes alguna duda, con gusto te ayudamos."
       }
     },
     {
@@ -61,7 +61,7 @@ async function enviarLista(to) {
       type: "interactive",
       interactive: {
         type: "list",
-        header: { type: "text", text: "*BARBACOA ALEX*" },
+        header: { type: "text", text: "BARBACOA ALEX" },
         body: { text: "👋 ¡Hola! Bienvenidos gracias por comunicarte con nosotros. ¿En qué podemos ayudarte hoy?.\n\nSelecciona una opción para continuar:" },
         footer: { text: "!Sera un gusto atenderte!" },
         action: {
